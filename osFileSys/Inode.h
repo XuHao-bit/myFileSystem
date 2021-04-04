@@ -1,24 +1,4 @@
 #pragma once
-class DiskInode
-{
-public:
-	DiskInode();
-	~DiskInode();
-
-public:
-	unsigned int d_mode;
-	int		d_nlink;
-	
-	short	d_uid;//owner's identifier
-	short	d_gid;//owner's group identifier
-
-	int		d_size;
-	int		d_addr[10];
-
-	int		d_atime;//last access time
-	int		d_mtime;//last modify time
-
-};
 
 class Inode
 {
