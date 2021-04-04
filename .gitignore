@@ -1,0 +1,4 @@
+/osFileSys.sln
+/osFileSys/*.vcxproj*
+/x64/*
+/.vs/*

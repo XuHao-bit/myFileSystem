@@ -1,5 +1,11 @@
 #pragma once
+#include <stdlib.h>
+#include <string.h>
 #include "Inode.h"
+#include "DeviceDriver.h"
+#include "Utility.h"
+#include "Buffer.h"
+#include "BufferManager.h"
 
 class SuperBlock
 {
@@ -35,6 +41,8 @@ public:
 	//下面的变量参考自unix v6++代码
 	static const int NMOUNT = 5;
 	
+	static const int SECTOR_SIZE = 512;
+
 	static const int SUPER_BLOCK_SECTOR_NUMBER = 200;	//superblock起始扇区号
 	
 	static const int ROOTINO = 0;	//文件系统根目录的外存inode编号
@@ -48,6 +56,11 @@ public:
 	static const int DATA_ZONE_SIZE = 18000 - DATA_ZONE_START_SECTOR;	//文件数据区占用扇区大小
 
 public:
+	BufferManager* bManager;
+	DeviceDriver* dDriver;
+	SuperBlock* sBlock;
+
+public:
 	FileSystem();
 	~FileSystem();
 
@@ -56,11 +69,8 @@ public:
 
 	void LoadSuperBlock();
 
-	/* 根据文件存储设备的设备号dev获取SuperBlock */
-	SuperBlock* GetSuperBlock(short dev);//作用未知？？
-
 	/* 更新内存SuperBlock的内存副本到磁盘 */
-	void Update();//
+	void Update();
 
 	/* 
 		以下涉及SuperBlock块的功能：
@@ -72,31 +82,22 @@ public:
 	*/
 
 	/* 在存储设备dev上分配一个空闲inode */
-	Inode* IAlloc(short dev);
+	Inode* IAlloc();
 
 	/* 释放存储设备dev上编号为number的外存INode，一般用于删除文件。 */
-	void IFree(short dev, int number);
+	void IFree(int number);
 
 	/* 在存储设备dev上分配空闲磁盘块 */
-	// Buf* Alloc(short dev);
+	Buffer* Alloc();
 	
 	/* 释放存储设备dev上编号为blkno的磁盘块  */
-	void Free(short dev, int blkno);
-
-	/* 查找文件系统装配表，搜索指定Inode对应的Mount装配块 */
-	//Mount* GetMount(Inode* pInode);
+	void Free(int blkno);
 
 private:
 	/* 检查设备dev上编号blkno的磁盘块是否属于数据盘块区 */
 	bool BadBlock(SuperBlock* spb, short dev, int blkno);
 
-public:
-	//Mount m_Mount[NMOUNT];		/* 文件系统装配块表，Mount[0]用于根文件系统 */
 
-private:
-	//BufferManager* m_BufferManager;		/* FileSystem类需要缓存管理模块(BufferManager)提供的接口 */
-	int updlock;				/* Update()函数的锁，该函数用于同步内存各个SuperBlock副本以及，
-								被修改过的内存Inode。任一时刻只允许一个进程调用该函数 */
 
 
 };

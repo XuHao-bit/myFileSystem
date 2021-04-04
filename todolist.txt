@@ -1,0 +1,11 @@
+2021/4/5：
+0. 完成BufferManager的相关功能，即高速缓存队列的实现
+
+1. 完善SuperBlock的相关功能，弄明白InodeTable在SuperBlock的分配中起到的作用。
+
+
+1. 完善filesystem类的函数的实现，即superblock的加载
+
+2. 完善superblock的相关功能
+
+
