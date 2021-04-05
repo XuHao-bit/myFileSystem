@@ -6,6 +6,7 @@
 #include "Utility.h"
 #include "Buffer.h"
 #include "BufferManager.h"
+#include "FileManager.h"
 
 class SuperBlock
 {
@@ -92,6 +93,9 @@ public:
 	
 	/* 释放存储设备dev上编号为blkno的磁盘块  */
 	void Free(int blkno);
+
+	/* 格式化superblock */
+	void FormatSuperBlock();
 
 private:
 	/* 检查设备dev上编号blkno的磁盘块是否属于数据盘块区 */

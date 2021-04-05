@@ -126,6 +126,7 @@
     <ClCompile Include="BufferManager.cpp" />
     <ClCompile Include="DeviceDriver.cpp" />
     <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="InodeTable.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>

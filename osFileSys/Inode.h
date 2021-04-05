@@ -42,6 +42,7 @@ public:
 public:
 	void ReadI();
 	void WriteI();
+	void Clean();
 
 public:
 	unsigned int i_flag; //

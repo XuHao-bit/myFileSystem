@@ -3,7 +3,7 @@
 extern DeviceDriver g_DeviceDriver;
 extern BufferManager g_BufferManager;
 extern SuperBlock g_SuperBlock;
-
+extern InodeTable g_InodeTable;
 
 /*==============================class SuperBlock===================================*/
 /* 系统全局超级块SuperBlock对象 */
@@ -20,6 +20,23 @@ SuperBlock::~SuperBlock(){}
 FileSystem::FileSystem(){}
 
 FileSystem::~FileSystem(){}
+
+void FileSystem::FormatSuperBlock()
+{
+	sBlock->s_isize = FileSystem::INODE_ZONE_SIZE;
+	sBlock->s_ninode = 0;
+	sBlock->s_ilock = 0;
+
+	sBlock->s_fsize = FileSystem::DATA_ZONE_SIZE;
+	sBlock->s_nfree = 0;
+	sBlock->s_free[0] = -1;
+	sBlock->s_flock = 0;
+
+	sBlock->s_fmod = 0;
+	sBlock->s_ronly = 0;
+	sBlock->s_time = 0xAABBCCDD;
+	sBlock->padding[46] = 0x473C2B1A;
+}
 
 void FileSystem::Initialize()
 {
@@ -62,16 +79,84 @@ Inode* FileSystem::IAlloc()//important!!
 {
 	int nInode;	//分配的inode号
 	Inode* pInode;
+	Buffer* pBuf;
 
-	if (sBlock->s_ninode > 0)
+	if (sBlock->s_ninode <= 0)
+	{
+		nInode = -1;
+
+		//一次读磁盘Inode，搜索空闲inode
+		for (int i = 0; i < sBlock->s_isize; i++)
+		{
+			pBuf = this->bManager->Bread(FileSystem::INODE_ZONE_START_SECTOR + i);
+
+			//获取缓冲区首地址
+			int* p = (int*)pBuf->b_addr;
+
+			//检查该缓冲区的每个diskInode的mode，若！=0表示已经被占用
+			for (int j = 0; j < FileSystem::INODE_NUMBER_PER_SECTOR; j++)
+			{
+				++nInode;//记录inode号
+
+				int mode = *(p + j * sizeof(DiskInode) / sizeof(int));
+				if (mode != 0)
+				{
+					continue;
+				}
+
+				//如果diskinode的mode=0，继续判断内存inode
+				if (g_InodeTable.IsLoaded(nInode) == -1) 
+				{
+					sBlock->s_inode[sBlock->s_ninode++] = nInode;
+					if (sBlock->s_ninode >= 100)
+					{
+						break;
+					}
+				}
+			}
+
+			//前往下一个inode的盘块搜索
+			this->bManager->Brelse(pBuf);
+
+			if (sBlock->s_ninode >= 100)
+			{
+				break;
+			}
+		}
+
+		sBlock->s_ilock = 0;
+
+		if (sBlock->s_ninode <= 0)
+		{
+			printf("No Space On Device!");
+			return NULL;
+		}
+	}
+
+	while (true)
 	{
 		nInode = sBlock->s_inode[--sBlock->s_ninode];
-		
-	}
-	else 
-	{
 
+		//将空闲Inode读入内存
+		pInode = g_InodeTable.IGet(nInode);
+		if (NULL == pInode)
+		{
+			return NULL;
+		}
+
+		if (0 == pInode->i_mode)
+		{
+			pInode.Clean();
+			sBlock->s_fmod = 1;
+			return pInode;
+		}
+		else
+		{
+			g_InodeTable.IPut(pInode);
+			continue;
+		}
 	}
+	return NULL;
 }
 
 void FileSystem::IFree(int number)
