@@ -1,8 +1,11 @@
 #include "DeviceDriver.h"
 
+extern DevTable g_DevTable;
+
 DeviceDriver::DeviceDriver()
 {
 	fp = fopen(DISK_FILE_NAME, "rb+");
+	dTable = &g_DevTable;
 }
 
 DeviceDriver::~DeviceDriver()
@@ -11,6 +14,7 @@ DeviceDriver::~DeviceDriver()
 	{
 		fclose(fp);
 	}
+	dTable = NULL;
 }
 
 void DeviceDriver::BWrite(const void* buf, unsigned size,
@@ -31,4 +35,9 @@ void DeviceDriver::BRead(void* buf, unsigned size,
 		fseek(fp, offset, whence);
 	}
 	fread(buf, size, 1, fp);
+}
+
+DevTable* DeviceDriver::GetDevTable()
+{
+	return this->dTable;
 }

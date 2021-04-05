@@ -1,10 +1,12 @@
 #pragma once
 #include <stdio.h>
+#include "Buffer.h"
 
 class DeviceDriver
 {
 public:
 	const char* DISK_FILE_NAME = "myDevice.img";
+	DevTable* dTable;
 
 private:
 	FILE* fp;
@@ -24,4 +26,20 @@ public:
 
 	void BRead(void* buf, unsigned int size,
 		int offset = -1, int whence = SEEK_SET);
+
+	DevTable* GetDevTable();
+};
+
+class DevTable
+{
+public:
+	DevTable();
+	~DevTable();
+public:
+	int d_active;
+	int d_errcnt;
+	Buffer* b_forw;
+	Buffer* b_back;
+	Buffer* d_actf;
+	Buffer* d_actl;
 };
