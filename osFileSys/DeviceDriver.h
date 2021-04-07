@@ -1,6 +1,9 @@
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
+#include "BufferManager.h"
+
+class DevTable;
 
 class DeviceDriver
 {

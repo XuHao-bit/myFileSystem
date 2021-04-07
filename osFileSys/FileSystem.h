@@ -5,7 +5,6 @@
 #include "Inode.h"
 #include "DeviceDriver.h"
 #include "Utility.h"
-#include "Buffer.h"
 #include "BufferManager.h"
 #include "FileManager.h"
 

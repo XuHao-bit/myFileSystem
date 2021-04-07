@@ -1,6 +1,8 @@
 #pragma once
 
-#include "File.h"
+#include "Inode.h"
+//#include "File.h"
+//#include "FileSystem.h"
 
 class OpenFileTable; //系统打开文件表
 class InodeTable; //内存Inode表
@@ -23,7 +25,7 @@ public:
 	void Format();
 
 public:
-	File m_File[NFILE];
+	//File m_File[NFILE];
 };
 
 
@@ -71,6 +73,6 @@ public:
 	Inode* GetFreeInode();
 
 public:
-	Inode m_Inode[NINODE];
-	FileSystem* m_FileSystem;
+	//Inode m_Inode[NINODE];
+	//FileSystem* m_FileSystem;
 };

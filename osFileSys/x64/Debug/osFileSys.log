@@ -1,4 +1,5 @@
-﻿  FileSystem.cpp
+﻿  Execute.cpp
+  Inode.cpp
   main.cpp
   正在生成代码...
   osFileSys.vcxproj -> C:\Users\63450\source\repos\myFileSystem\x64\Debug\osFileSys.exe

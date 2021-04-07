@@ -1,4 +1,5 @@
 #pragma once
+//#include "BufferManager.h"
 
 class Inode
 {
@@ -59,7 +60,7 @@ public:
 	void Clean();
 
 	/* 将包含外存Inode字符块中信息拷贝到内存Inode中 */
-	void ICopy(Buffer* bp, int inumber);
+	//void ICopy(Buffer* bp, int inumber);
 
 public:
 	unsigned int i_flag; //
