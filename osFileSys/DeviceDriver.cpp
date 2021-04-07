@@ -37,7 +37,17 @@ void DeviceDriver::BRead(void* buf, unsigned size,
 	fread(buf, size, 1, fp);
 }
 
-DevTable* DeviceDriver::GetDevTable()
+void DeviceDriver::OpenFile()
 {
-	return this->dTable;
+	fp = fopen(DISK_FILE_NAME, "wb+");//变成空文件
+	if (NULL == fp)
+	{
+		printf("打开文件%s失败", DISK_FILE_NAME);
+		exit(-1);
+	}
+}
+
+int DeviceDriver::GetDevTable()
+{
+
 }

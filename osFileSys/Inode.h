@@ -40,9 +40,26 @@ public:
 	~Inode();
 
 public:
+	/* 根据Inode对象中的物理磁盘块索引表，读取相应的文件数据 */
 	void ReadI();
+
+	/* 根据Inode对象中的物理磁盘块索引表，将数据写入文件 */
 	void WriteI();
+
+	/* 将文件的逻辑块号转换成对应的物理盘块号 */
+	int Bmap(int lbn);
+
+	/* 更新外存Inode的最后的访问时间、修改时间 */
+	void IUpdate(int time);
+
+	/* 释放Inode对应文件占用的磁盘块 */
+	void ITrunc();
+
+	/* 清空Inode对象中的数据 */
 	void Clean();
+
+	/* 将包含外存Inode字符块中信息拷贝到内存Inode中 */
+	void ICopy(Buffer* bp, int inumber);
 
 public:
 	unsigned int i_flag; //

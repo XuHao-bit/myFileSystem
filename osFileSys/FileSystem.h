@@ -1,6 +1,7 @@
 #pragma once
 #include <stdlib.h>
 #include <string.h>
+#include<time.h>
 #include "Inode.h"
 #include "DeviceDriver.h"
 #include "Utility.h"
@@ -44,13 +45,14 @@ public:
 	
 	static const int SECTOR_SIZE = 512;
 
-	static const int SUPER_BLOCK_SECTOR_NUMBER = 200;	//superblock起始扇区号
+	static const int SUPER_BLOCK_START_SECTOR = 200;	//superblock起始扇区号
 	
 	static const int ROOTINO = 0;	//文件系统根目录的外存inode编号
 
 	static const int INODE_NUMBER_PER_SECTOR = 8;	//每个扇区外存Inode的个数（512/64 = 8）
 	static const int INODE_ZONE_START_SECTOR = 202;	//外存inode的起始扇区号
 	static const int INODE_ZONE_SIZE = 1024 - 202;	//外存inode占用扇区的大小
+	static const int INODE_NUMBERS = INODE_ZONE_SIZE * INODE_NUMBER_PER_SECTOR;	//外存Inode的总数
 
 	static const int DATA_ZONE_START_SECTOR = 1024;		//文件数据区的起始扇区号
 	static const int DATA_ZONE_END_SECTOR = 18000 - 1;	//文件数据区的结束扇区号
@@ -96,6 +98,9 @@ public:
 
 	/* 格式化superblock */
 	void FormatSuperBlock();
+
+	/* 格式化整个文件系统 */
+	void FormatFileSystem();
 
 private:
 	/* 检查设备dev上编号blkno的磁盘块是否属于数据盘块区 */

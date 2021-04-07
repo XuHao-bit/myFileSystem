@@ -38,6 +38,54 @@ void FileSystem::FormatSuperBlock()
 	sBlock->padding[46] = 0x473C2B1A;
 }
 
+void FileSystem::FormatFileSystem()
+{
+	FormatSuperBlock();
+	dDriver->OpenFile();	//将原文件变为空文件
+
+	dDriver->BWrite(sBlock, sizeof(sBlock), SUPER_BLOCK_START_SECTOR *SECTOR_SIZE);	//从200写入
+
+	//diskinode初始化
+	DiskInode root, empty;
+	root.d_mode |= Inode::IALLOC | Inode::IFDIR;
+	root.d_nlink = 1;
+	dDriver->BWrite(&root, sizeof(root), INODE_ZONE_START_SECTOR * SECTOR_SIZE);
+
+	sBlock->s_ninode = 0;
+	for (int i = 1; i < FileSystem::INODE_NUMBERS; i++)	//将root的预留
+	{
+		if (sBlock->s_ninode <= 100)
+		{
+			sBlock->s_inode[sBlock->s_ninode++] = i + INODE_ZONE_START_SECTOR;
+		}
+		dDriver->BWrite(&empty, sizeof(empty), 0, SEEK_CUR);
+	}
+
+
+	sBlock->s_nfree = 0;
+	//磁盘文件数据区初始化
+	char fBlock[SECTOR_SIZE], fBlock1[SECTOR_SIZE];
+	for (int j = 0; j < FileSystem::DATA_ZONE_SIZE; j++)
+	{
+		if (sBlock->s_nfree <= 100)
+		{
+			dDriver->BWrite(fBlock1, sizeof(fBlock1), (DATA_ZONE_START_SECTOR + j) * SECTOR_SIZE);
+		}
+		else
+		{
+			memcpy(fBlock, sBlock->s_free, 101 * sizeof(int));
+			dDriver->BWrite(fBlock, sizeof(fBlock), (DATA_ZONE_START_SECTOR + j) * SECTOR_SIZE);
+			sBlock->s_nfree = 0;
+			memset(sBlock->s_free, 0, sizeof(sBlock->s_free));
+		}
+		sBlock->s_free[sBlock->s_nfree++] = j + DATA_ZONE_START_SECTOR;
+	}
+
+	time((time_t*)& sBlock->s_time);
+
+	dDriver->BWrite(sBlock, sizeof(sBlock), SUPER_BLOCK_START_SECTOR * SECTOR_SIZE);
+}
+
 void FileSystem::Initialize()
 {
 	//this->updlock = 0;
@@ -54,7 +102,7 @@ void FileSystem::LoadSuperBlock()
 
 		int* p = (int*)& g_spb + i * 128;
 
-		dDriver->BRead(buf,512,(SUPER_BLOCK_SECTOR_NUMBER+i)*SECTOR_SIZE);
+		dDriver->BRead(buf,512,(SUPER_BLOCK_START_SECTOR +i)*SECTOR_SIZE);
 		Utility::DWordCopy((int*)buf, p, 128);
 
 		free(buf);
@@ -69,13 +117,10 @@ void FileSystem::LoadSuperBlock()
 
 void FileSystem::Update()
 {
-	int i;
-	SuperBlock* sb;
-
-	//for(i = 0;i)
+	
 }
 
-Inode* FileSystem::IAlloc()//important!!
+Inode* FileSystem::IAlloc()
 {
 	int nInode;	//分配的inode号
 	Inode* pInode;
@@ -146,7 +191,7 @@ Inode* FileSystem::IAlloc()//important!!
 
 		if (0 == pInode->i_mode)
 		{
-			pInode.Clean();
+			pInode->Clean();
 			sBlock->s_fmod = 1;
 			return pInode;
 		}
@@ -185,34 +230,39 @@ Buffer* FileSystem::Alloc()
 	//如果分配完，将free[0]的信息(前101个)填入SuperBlock
 	if (sBlock->s_nfree <= 0)	
 	{
-		int* newBuf = (int*)malloc(101*sizeof(int));
-		if (newBuf == NULL) exit(1);
-
-		dDriver->BRead(newBuf, 101*sizeof(int), (sBlock->s_free[0]) * SECTOR_SIZE);
-
-		sBlock->s_nfree = *newBuf++;
-		memcpy(sBlock->s_free, newBuf, sizeof(sBlock->s_free));
-		free(newBuf);
+		pBuf = bManager->GetBlock(nBlock);
+		int* p = (int*)pBuf->b_addr;
+		sBlock->s_nfree = *p++;
+		memcpy(sBlock->s_free, p, sizeof(sBlock->s_free));
+		bManager->Brelse(pBuf);
 	}
 
-	pBuf = ;
+	pBuf = bManager->GetBlock(nBlock);
 	if (pBuf)
 	{
-
+		bManager->ClrBuf(pBuf);
 	}
+
 	sBlock->s_fmod = 1;
 	return pBuf;
 }
 
-void FileSystem::Free(int blkno)
+void FileSystem::Free(int nBlock)
 {
+	Buffer* pBuf;
+
 	if (sBlock->s_nfree >= 100)
 	{
 		//将s_free和s_nfree写入回收的盘块
+		pBuf = bManager->GetBlock(nBlock);
+		int* p = (int*)pBuf->b_addr;
+		*p++ = sBlock->s_nfree;
+		memcpy(p, sBlock->s_free, sizeof(sBlock->s_free));
+		bManager->Bwrite(pBuf);
 
 		sBlock->s_nfree = 0;
 	}
 
-	sBlock->s_free[sBlock->s_nfree++] = blkno;
+	sBlock->s_free[sBlock->s_nfree++] = nBlock;
 	sBlock->s_fmod = 1;
 }

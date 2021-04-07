@@ -30,14 +30,14 @@
     <ClCompile Include="BufferManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="InodeTable.cpp">
+    <ClCompile Include="OpenFileTable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Inode.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Block.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Execute.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -53,9 +53,6 @@
     <ClInclude Include="Inode.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="InodeTable.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="OpenFileTable.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -63,9 +60,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Buffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BufferManager.h">

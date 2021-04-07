@@ -1,6 +1,6 @@
 #pragma once
 #include <stdio.h>
-#include "Buffer.h"
+#include <stdlib.h>
 
 class DeviceDriver
 {
@@ -27,7 +27,9 @@ public:
 	void BRead(void* buf, unsigned int size,
 		int offset = -1, int whence = SEEK_SET);
 
-	DevTable* GetDevTable();
+	void OpenFile();
+
+	int GetDevTable();
 };
 
 class DevTable
